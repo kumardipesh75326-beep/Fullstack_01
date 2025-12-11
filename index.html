@@ -1,1 +1,167 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Password Strength Checker</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 50px;
+            background-color: #f7f9fc;
+            text-align: center;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.1em;
+            min-height: 20px; /* Ensures space is reserved for the message */
+        }
+        /* Color classes for results */
+        .weak {
+            background-color: #ffdddd; /* Light Red */
+            color: #d80000; /* Dark Red */
+            border: 1px solid #d80000;
+        }
+        .medium {
+            background-color: #fff9e6; /* Light Yellow */
+            color: #cc9900; /* Dark Yellow */
+            border: 1px solid #cc9900;
+        }
+        .strong {
+            background-color: #ddffdd; /* Light Green */
+            color: #008000; /* Dark Green */
+            border: 1px solid #008000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>🔒 Password Strength Checker</h2>
+        <p>Type a password to test its strength:</p>
+
+        <input type="password" id="passwordInput" placeholder="Enter your password here">
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // 1. Get the HTML elements we need to interact with
+        const passwordInput = document.getElementById('passwordInput');
+        const resultDiv = document.getElementById('result');
+
+        /**
+         * The core function to check password strength.
+         * @param {string} password - The password string to check.
+         * @returns {object} An object containing the strength category and a message.
+         */
+        function checkPasswordStrength(password) {
+            // Define the special characters we are looking for
+            const specialChars = "!@#$%^&*";
+            
+            // Initialize checks
+            let hasNumber = false;
+            let hasSpecial = false;
+
+            // Loop through the password to find specific characters
+            for (let i = 0; i < password.length; i++) {
+                let char = password[i];
+
+                // Check if the character is a number (0-9)
+                if (char >= '0' && char <= '9') {
+                    hasNumber = true;
+                }
+
+                // Check if the character is in our list of special characters
+                if (specialChars.includes(char)) {
+                    hasSpecial = true;
+                }
+            }
+
+            // Determine Strength using Conditions
+            const length = password.length;
+
+            if (length === 0) {
+                return { category: '', message: 'Please enter a password.' };
+            }
+            else if (length < 8) {
+                return { category: 'weak', message: `Weak: Too short (${length} / 8 characters required).` };
+            } 
+            else if (hasNumber && hasSpecial) {
+                return { category: 'strong', message: 'Strong: Excellent password!' };
+            } 
+            else {
+                let missing = [];
+                if (!hasNumber) missing.push('a number');
+                if (!hasSpecial) missing.push('a special character');
+                
+                return { 
+                    category: 'medium', 
+                    message: `Medium: Length is OK, but add ${missing.join(' or ')}.` 
+                };
+            }
+        }
+
+        /**
+         * Updates the webpage display based on the strength check.
+         */
+        function updateStrengthDisplay() {
+            const password = passwordInput.value;
+            const strength = checkPasswordStrength(password);
+
+            // 1. Clear previous classes and content
+            resultDiv.className = '';
+            
+            // 2. Set new content and class
+            resultDiv.textContent = strength.message;
+            
+            if (strength.category) {
+                // Add the relevant class (weak, medium, or strong) for styling
+                resultDiv.classList.add(strength.category);
+            }
+        }
+
+        // 3. Attach the function to an event listener for live checking
+        passwordInput.addEventListener('input', updateStrengthDisplay);
+
+        // Initial call to set the default message
+        updateStrengthDisplay();
+
+    </script>
+
+</body>
+</html>
